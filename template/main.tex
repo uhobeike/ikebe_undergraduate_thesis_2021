@@ -1,0 +1,75 @@
+\documentclass[a4paper,11pt]{jsbook}
+
+\newcommand{\V}[1]{\boldsymbol{#1}}
+\def\thline{\noalign{\hrule height 1pt}}
+\def\tvline{\vrule width 1pt}
+
+\usepackage{here} %図の場所の指定で[H]（ここに貼る）を指定するためのパッケージ
+\usepackage{makeidx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[dvipdfmx]{graphicx} %dvipdfmxはjpgやpngの張り込みのために使用
+
+\makeindex
+
+\pagenumbering{roman}
+
+\begin{document}
+% 表紙
+\title{平成27年度 卒業論文\\
+ドリルキングアンセムの研究}
+
+\author{鳥"留噛男 \\
+China Institute of Technology}
+
+\date{2017年2月x日}
+
+\maketitle
+
+%%% 但し書き等 %%%
+この論文は、読んだあと自動的に消滅する。
+\clearpage
+
+%%% 献辞 %%%
+% D論、あるいは誰かを亡くしたときの卒論、修論等で
+% 配偶者や配偶者の予定となる人の名前は覚悟をもって書くこと
+\thispagestyle{empty}
+\vfil
+\ \\
+\vspace{15em}
+\begin{center}
+	{\Large 最愛の京成線に捧ぐ }
+\end{center}
+% 献辞をかかない場合はここまでコメントアウト
+
+\include{preface}
+
+\tableofcontents
+
+%\cleardoublepage
+
+%%% 本文 %%%
+% 章のページの先頭は左側（奇数ページ）に来る
+
+\cleardoublepage
+\pagenumbering{arabic}
+
+\include{introduction}
+\include{purpose}
+\include{method}
+\include{conclusion}
+
+\appendix
+\include{appendix}
+
+%%% 参考文献 %%%
+% よほどのことが無い限りet al.は使わないことにしましょう
+\bibliographystyle{jualpha}
+\bibliography{./references}
+
+\newpage
+\printindex
+
+\end{document}
+
+
