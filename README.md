@@ -1,1 +1,1 @@
-# ikebeundergraduate_thesis_2021
+# ikebe_undergraduate_thesis_2021
