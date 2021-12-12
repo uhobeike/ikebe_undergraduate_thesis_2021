@@ -4,7 +4,7 @@ main.pdf: main.dvi
 main.dvi: *.tex
 	sed -e 's/。/. /g' -e 's/、/, /g' main.tex > tmp.tex
 	platex tmp.tex
-# pbibtex tmp.aux
+	pbibtex tmp.aux
 # mendex tmp
 	platex tmp.tex
 	platex tmp.tex
