@@ -3,9 +3,33 @@
 本章では, 尤度場モデルを使用したパーティクルフィルタについて説明をする. 
 尤度場モデルを使用したパーティクルフィルタは, 手持ちの地図から事前に求めた, 
 マップ上の障害物検知の尤度を表すxy座標上の関数をパーティクルの尤度計算に使用して
-自己位置を推定するアルゴリズムである. 
+自己位置を推定するアルゴリズム[\ref{alg:mcl}]である. 
 この方法は, 得られるパーティクルの確率分布が雑然とした環境でも滑らかになることや尤度場の事前計算によって
 計算効率の高いことがメリットとしてある. 
+
+\begin{figure}[h]
+  \begin{algorithm}[H]
+      \caption{MCL($\mathcal{X}_{t-1}, u_t, z_t, m$)}
+      \label{alg:mcl}
+      \begin{algorithmic}
+      \STATE $\mathcal{\bar{X}}_t = \mathcal{X}_t = 0$
+
+      \FOR {$m = 1$ to $M$}
+      \STATE $x_{t}^{[m]} = sample\_motion\_model(u_{t}, x_{t-1}^{[m]})$
+      \STATE $w_{t}^{[m]} = likelihood\_field\_range\_finder\_model\_model(z_{t}, x_{t}^{[m]}, m)$
+      \STATE $\mathcal{\bar{X}}_t = \mathcal{\bar{X}}_t + <x_{t}^{[m]}, w_{t}^{[m]}>$
+      \ENDFOR
+
+      \FOR {$m = 1$ to $M$}
+      \STATE $draw\;i\;with\;probability \propto w_{t}^{[i]}$
+      \STATE $add\; x_{t}^{[i]}\;to\;\mathcal{X}_t$
+      \ENDFOR
+
+      \RETURN $\mathcal{X}_t$
+      \end{algorithmic}
+  \end{algorithm}
+  \caption{MCLの疑似コード}
+\end{figure}
 
 \section{パーティクルフィルタの目的・理論}
 
@@ -40,6 +64,7 @@ $x$は$\sum_{world}$上でのロボットの位置を（x, y）,向きを$\theta
 \end{eqnarray}
 式(\ref{exp:b_t})の右辺から信念分布$b_t$を求めるためには状態遷移モデルである式(\ref{exp:u_m})と
 観測モデルである式(\ref{exp:z_m})を用いる。
+しかし、今回は尤度場モデルを使用するため、式(\ref{exp:z_m})は式(\ref{exp:z_m_m})になる。
 
 \begin{eqnarray}
   \label{exp:u_m}
@@ -49,6 +74,11 @@ $x$は$\sum_{world}$上でのロボットの位置を（x, y）,向きを$\theta
 \begin{eqnarray}
   \label{exp:z_m}
   z_t 〜 p(z|x_t)
+\end{eqnarray}
+
+\begin{eqnarray}
+  \label{exp:z_m_m}
+  z_t 〜 p(z|x_t, m)
 \end{eqnarray}
 
 \subsection{状態遷移モデルによる事前分布}
@@ -72,9 +102,9 @@ $x$は$\sum_{world}$上でのロボットの位置を（x, y）,向きを$\theta
 
 \begin{eqnarray}
   \label{exp:b_beizu}
-  b_t(x) &=& \hat{b_t}(x|z_t) \nonumber \\
-  &=& \frac{p(z_t|x)\hat{b_t}(x)}{p(z_t)} \nonumber \\
-  &=& \eta p(z_t|x)\hat{b_t}(x)
+  b_t(x) &=& \hat{b_t}(x|z_t, m) \nonumber \\
+  &=& \frac{p(z_t|x, m)\hat{b_t}(x)}{p(z_t)} \nonumber \\
+  &=& \eta p(z_t|x, m)\hat{b_t}(x)
 \end{eqnarray}
 
 \subsection{パーティクルによる近似}
@@ -90,6 +120,7 @@ $x$は$\sum_{world}$上でのロボットの位置を（x, y）,向きを$\theta
 
 そして、観測による更新を考慮すると、式(\ref{exp:b_p})は
 重み$w_t$によって式(\ref{exp:b_p_z})になる。
+Nはパーティクルの数である。
 
 \begin{eqnarray}
   \label{exp:b_p_z}
@@ -101,7 +132,7 @@ $x$は$\sum_{world}$上でのロボットの位置を（x, y）,向きを$\theta
 
 \begin{eqnarray}
   \label{exp:b_p_w}
-  w_{t}^{(i)} &=& L_j(x_{t}^{(i)} | z_{j, t})\hat{w}_{t}^{i}
+  w_{t}^{(i)} &=& L_j(x_{t}^{(i)} | z_{j, t}, m)\hat{w}_{t}^{i}
 \end{eqnarray}
 
 \subsection{リサンプリング}
@@ -111,42 +142,170 @@ $x$は$\sum_{world}$上でのロボットの位置を（x, y）,向きを$\theta
 をコピーしたものをその周辺にパーティクルを撒く。また、小さな重みを持つパーティクルは
 削除される。
 
-\section{パーティクルフィルタによる自己位置推定の手順}
+\section{課題点}
 
+一般的なパーティクルフィルタは静的環境とマルコフ性を仮定しているという制限がある。
+なので、動的障害物が常に観測情報として含まれている場合、自己位置推定は影響を受け続ける。
+そういった影響に対応するために\cite{赤井2019}のようなアウトライヤーを棄却するアルゴリズムが
+必要になってくる。
+しかし、過度にアウトライヤーを棄却するとかえって自己位置推定に影響を与えてしまう。
+そのため、自己位置推定に影響を与えずに尤度計算の前に観測情報の
+アウトライヤーを棄却するようなアルゴリズムが必要である。(影響とは？)
+
+\newpage
+\section{パーティクルフィルタの流れ}
 \begin{figure}[h]
   \begin{center}
-    \includegraphics[width=1.0\linewidth]{figs/particle_filter_flow.png}
+    \includegraphics[width=1.2\linewidth]{figs/particle_filter_flow.png}
     \caption{パーティクルフィルタの流れ}
     \label{fig:particle_filter_flow}
   \end{center}
 \end{figure}
 
-\subsection{パーティクルフィルタの初期化}
-
-まず、パーティクルの初期位置を$x_0$とする。
-
-
-次に手持ちのマップから尤度場を求める。
-尤度場は
-
-
-\subsection{状態遷移モデルによる予測}
-
-\subsection{尤度場を用いた、観測モデルによる尤度計算}
-
-\subsection{リサンプリングによるパーティクルの更新}
-
-\section{課題点}
-
-
 \chapter{各パーティクルに観測範囲を可変にした未知障害物対策}
 \section{はじめに}
-この章では, 提案手法である, 各パーティクルに観測範囲を可変にした未知障害物の対策法について
-説明する. 
+本章では, 提案手法である, 各パーティクルに観測範囲を可変にすることで未知障害物の対策をした、
+アルゴリズムについて説明する. 
+このアルゴリズム[\ref{alg:proposed_mcl}]は、各パーティクルに、自己位置推定に影響を
+与えないような観測範囲を与えることによって未知障害物の対応する
+アルゴリズムである。
+また、従来のパーティクルフィルタに対して、
+計算時間の増加なしに、未知障害物による急激な尤度の低下を防ぐことができる。
+
+\begin{figure}[h]
+  \begin{algorithm}[H]
+      \caption{Proposed MCL($\mathcal{X}_{t-1}, u_t, z_t, m , p_{p\_angle}$)}
+      \label{alg:proposed_mcl}
+      \begin{algorithmic}
+      \STATE $\mathcal{\bar{X}}_t = \mathcal{X}_t = 0$
+
+      \FOR {$p = 1$ to $P$}
+      \STATE $x_{t}^{[p]} = sample\_motion\_model(u_{t}, x_{t-1}^{[p]})$
+      \STATE $w_{t}^{[p]} = likelihood\_field\_range\_finder_model\_model(z_{t}, x_{t}^{[p]}, m, p_{p\_angle})$
+      \STATE $\mathcal{\bar{X}}_t = \mathcal{\bar{X}}_t + <x_{t}^{[p]}, w_{t}^{[p]}>$
+      \ENDFOR
+
+      \FOR {$p = 1$ to $P$}
+      \STATE $draw\;i\;with\;probability \propto w_{t}^{[i]}$
+      \STATE $add\; x_{t}^{[i]}\;to\;\mathcal{X}_t$
+      \STATE $add\;\;p_{p\_angle}\;to\;p$
+      \STATE $\Uparrow サンプリングしたパーティクルにランダムな観測パターンを付与$
+      \ENDFOR
+      \FOR {$p = 1$ to $P$}
+      \STATE $P_{mode\_p\_angle} \Leftarrow 全パーティクルの中で最瀕な観測パターン$
+      \STATE $P_{mode\_p\_angle} = Mode\_p\_angle(p\rightarrow p_{p\_angle})$
+      \ENDFOR
+      
+      \RETURN $\mathcal{X}_t, P_{mode\_p\_angle}$
+      \end{algorithmic}
+  \end{algorithm}
+  \caption{提案した手法を用いたMCLの疑似コード}
+\end{figure}
 
 \subsection{パーティクルに観測パターンを付与}
+まずはじめに、パーティクルフィルタはN個のパーティクルを生成する。
+次に、未知障害物を観測した情報を棄却するために図\ref{fig:z_pattern}のような、
+観測パターンを用意する。そして、生成された各観測パターンは、N個の各パーティクルに対して
+ランダムに与えられる。その後は従来通り、状態遷移モデルに従ってパーティクルをランダムに遷移させる。
+
+
+
+\newpage
+
+\begin{figure}[H]
+  \begin{tabular}{ll}
+    \begin{minipage}[h]{0.4\hsize}
+      \centering
+      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_1.png}
+      \subcaption{$p_{a}=360°$}
+    \end{minipage} 
+    \begin{minipage}[h]{0.4\hsize}
+      \centering
+      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_2.png}
+      \subcaption{$90°\leqq p_{a}\leqq 360°$}
+    \end{minipage} 
+    \begin{minipage}[h]{0.3\hsize}
+      \centering
+      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_3.png}
+      \subcaption{$90°\leqq p_{a}\leqq 360°$, \\ \hspace{5mm}$90°\leqq p_{a}\leqq 360°$}
+    \end{minipage} \\
+    
+    \begin{minipage}[h]{0.4\hsize}
+      \centering
+      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_4.png}
+      \subcaption{$90°\leqq p_{a}\leqq 180°$, \\ \hspace{5mm}$270°\leqq p_{a}\leqq 360°$}
+    \end{minipage}
+  \begin{minipage}[h]{0.4\hsize}
+    \centering
+    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_5.png}
+    \subcaption{$0°\leqq p_{a}\leqq 270°$}
+  \end{minipage}
+  \begin{minipage}[h]{0.25\hsize}
+    \centering
+    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_6.png}
+    \subcaption{$180°\leqq p_{a}\leqq 360°$}
+  \end{minipage} \\ 
+
+  \begin{minipage}[h]{0.4\hsize}
+    \centering
+    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_7.png}
+    \subcaption{$0°\leqq p_{a}\leqq 180°$}
+  \end{minipage}
+  \begin{minipage}[h]{0.4\hsize}
+    \centering
+    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_8.png}
+    \subcaption{$90°\leqq p_{a}\leqq 180°$, \\ \hspace{5mm}$270°\leqq p_{a}\leqq 360°$}
+  \end{minipage} 
+  \begin{minipage}[h]{0.4\hsize}
+    \centering
+    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_9.png}
+    \subcaption{$0°\leqq p_{a}\leqq 90°$, \\ \hspace{5mm}$180°\leqq p_{a}\leqq 270°$}
+  \end{minipage} 
+  \end{tabular}
+  \caption{各観測パターン($p_a=p_{angle}$)}
+  \label{fig:z_pattern}
+\end{figure}
+
 \subsection{尤度計算による観測パターンの評価}
+
+遷移された各パーティクルの尤もらしさを評価するために尤度場を使用した尤度関数を用いて
+各パーティクルの尤度を求める。
+観測パターンを持った各パーティクルの尤度は式[\ref{exp:b_p_w_angle}]のように求まる。
+
+\begin{eqnarray}
+  \label{exp:b_p_w_angle}
+  L_j(x_{t}^{(i)} | z_{j, t}, m, p_{angle})
+\end{eqnarray}
+観測情報$z_t$を観測パターン$p_{angle}$によってフィルタをかけることで、使用する観測情報に制限をかけている。
+例えば、図\ref{fig:z_pattern}のように、$p_{angle} = (a)$を持ったパーティクルであれば、
+尤度計算に用いる観測情報は$z_t$の全てである。
+$p_{angle} = (b)$を持ったパーティクルであれば、尤度計算に用いる観測情報は$360°$のうち$0°〜90°$を間引いた
+観測情報$z_t$になる。
+
+
 \subsection{リサンプリング時にランダムな観測パターンを付与}
+
+パーティクルフィルタの初期化時に、各パーティクルに与えた観測パターンのままであると、
+最尤なパーティクルの観測パターンを全てのパーティクル持つことになってしまう。
+つまり、ある観測パターンに収束したままになってしまい、環境に応じて
+観測パターンを変化させることができない状態に陥る。
+そのため、リサンプリング時にN個のパーティクルのうち$\frac{N}{10}$個程度のパーティクルをサンプリングし、
+ランダムな観測パターンを与える。
+
 \subsection{尤度計算とリサンプリングによる観測パターンの収束}
 
+以上の尤度計算による観測パターンの評価とリサンプリングによるランダムな観測パターンを持ったパーティクルの
+追加によって、パーティクルフィルタは環境に応じて、適した観測パターンを各パーティクルに与えることができる。
+そして、全パーティクルで最瀕な観測パターンを求めることで、提案した手法を用いたパーティクルフィルタは、
+ロボットの姿勢と環境に適した観測パターンを求めることができる。
 
+\newpage
+\section{提案した手法用いたパーティクルフィルタの流れ}
+
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=1.2\linewidth]{figs/particle_filter_flow_improve.png}
+    \caption{提案した手法用いたパーティクルフィルタの流れ}
+    \label{fig:particle_filter_flow_improve}
+  \end{center}
+\end{figure}
