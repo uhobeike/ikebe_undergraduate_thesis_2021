@@ -162,9 +162,9 @@ Nはパーティクルの数である。
   \end{center}
 \end{figure}
 
-\chapter{各パーティクルに観測範囲を可変にした未知障害物対策}
+\chapter{各パーティクルに観測範囲を付与した未知障害物対策}
 \section{はじめに}
-本章では, 提案手法である, 各パーティクルに観測範囲を可変にすることで未知障害物の対策をした、
+本章では, 提案手法である, 各パーティクルに観測範囲を付与することで未知障害物の対策をした、
 アルゴリズムについて説明する. 
 このアルゴリズム[\ref{alg:proposed_mcl}]は、各パーティクルに、自己位置推定に影響を
 与えないような観測範囲を与えることによって未知障害物の対応する
@@ -174,29 +174,29 @@ Nはパーティクルの数である。
 
 \begin{figure}[h]
   \begin{algorithm}[H]
-      \caption{Proposed MCL($\mathcal{X}_{t-1}, u_t, z_t, m , p_{p\_angle}$)}
+      \caption{Proposed MCL($\mathcal{X}_{t-1}, u_t, z_t, m , p_{p\_\mathsf{angle}}$)}
       \label{alg:proposed_mcl}
       \begin{algorithmic}
       \STATE $\mathcal{\bar{X}}_t = \mathcal{X}_t = 0$
 
       \FOR {$p = 1$ to $P$}
       \STATE $x_{t}^{[p]} = sample\_motion\_model(u_{t}, x_{t-1}^{[p]})$
-      \STATE $w_{t}^{[p]} = likelihood\_field\_range\_finder_model\_model(z_{t}, x_{t}^{[p]}, m, p_{p\_angle})$
+      \STATE $w_{t}^{[p]} = likelihood\_field\_range\_finder_model\_model(z_{t}, x_{t}^{[p]}, m, p_{p\_\mathsf{angle}})$
       \STATE $\mathcal{\bar{X}}_t = \mathcal{\bar{X}}_t + <x_{t}^{[p]}, w_{t}^{[p]}>$
       \ENDFOR
 
       \FOR {$p = 1$ to $P$}
       \STATE $draw\;i\;with\;probability \propto w_{t}^{[i]}$
       \STATE $add\; x_{t}^{[i]}\;to\;\mathcal{X}_t$
-      \STATE $add\;\;p_{p\_angle}\;to\;p$
+      \STATE $add\;\;p_{p\_\mathsf{angle}}\;to\;p$
       \STATE $\Uparrow サンプリングしたパーティクルにランダムな観測パターンを付与$
       \ENDFOR
       \FOR {$p = 1$ to $P$}
-      \STATE $P_{mode\_p\_angle} \Leftarrow 全パーティクルの中で最瀕な観測パターン$
-      \STATE $P_{mode\_p\_angle} = Mode\_p\_angle(p\rightarrow p_{p\_angle})$
+      \STATE $P_\mathsf{mode\_p\_\mathsf{angle}} \Leftarrow 全パーティクルの中で最瀕な観測パターン$
+      \STATE $P_\mathsf{mode\_p\_\mathsf{angle}} = Mode\_p\_\mathsf{angle}(p\rightarrow p_{p\_\mathsf{angle}})$
       \ENDFOR
       
-      \RETURN $\mathcal{X}_t, P_{mode\_p\_angle}$
+      \RETURN $\mathcal{X}_t, P_\mathsf{mode\_p\_\mathsf{angle}}$
       \end{algorithmic}
   \end{algorithm}
   \caption{提案した手法を用いたMCLの疑似コード}
@@ -208,62 +208,14 @@ Nはパーティクルの数である。
 観測パターンを用意する。そして、生成された各観測パターンは、N個の各パーティクルに対して
 ランダムに与えられる。その後は従来通り、状態遷移モデルに従ってパーティクルをランダムに遷移させる。
 
-
-
 \newpage
 
 \begin{figure}[H]
-  \begin{tabular}{ll}
-    \begin{minipage}[h]{0.4\hsize}
-      \centering
-      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_1.png}
-      \subcaption{$p_{a}=360°$}
-    \end{minipage} 
-    \begin{minipage}[h]{0.4\hsize}
-      \centering
-      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_2.png}
-      \subcaption{$90°\leqq p_{a}\leqq 360°$}
-    \end{minipage} 
-    \begin{minipage}[h]{0.3\hsize}
-      \centering
-      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_3.png}
-      \subcaption{$90°\leqq p_{a}\leqq 360°$, \\ \hspace{5mm}$90°\leqq p_{a}\leqq 360°$}
-    \end{minipage} \\
-    
-    \begin{minipage}[h]{0.4\hsize}
-      \centering
-      \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_4.png}
-      \subcaption{$90°\leqq p_{a}\leqq 180°$, \\ \hspace{5mm}$270°\leqq p_{a}\leqq 360°$}
-    \end{minipage}
-  \begin{minipage}[h]{0.4\hsize}
-    \centering
-    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_5.png}
-    \subcaption{$0°\leqq p_{a}\leqq 270°$}
-  \end{minipage}
-  \begin{minipage}[h]{0.25\hsize}
-    \centering
-    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_6.png}
-    \subcaption{$180°\leqq p_{a}\leqq 360°$}
-  \end{minipage} \\ 
-
-  \begin{minipage}[h]{0.4\hsize}
-    \centering
-    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_7.png}
-    \subcaption{$0°\leqq p_{a}\leqq 180°$}
-  \end{minipage}
-  \begin{minipage}[h]{0.4\hsize}
-    \centering
-    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_8.png}
-    \subcaption{$90°\leqq p_{a}\leqq 180°$, \\ \hspace{5mm}$270°\leqq p_{a}\leqq 360°$}
-  \end{minipage} 
-  \begin{minipage}[h]{0.4\hsize}
-    \centering
-    \includegraphics[keepaspectratio, scale=0.15]{figs/pattern_9.png}
-    \subcaption{$0°\leqq p_{a}\leqq 90°$, \\ \hspace{5mm}$180°\leqq p_{a}\leqq 270°$}
-  \end{minipage} 
-  \end{tabular}
-  \caption{各観測パターン($p_a=p_{angle}$)}
-  \label{fig:z_pattern}
+  \begin{center}
+    \includegraphics[width=0.8\linewidth]{figs/obs_pangle.png}
+    \caption{観測パターン（$p_\mathsf{angle}$）}
+    \label{fig:1}
+  \end{center}
 \end{figure}
 
 \subsection{尤度計算による観測パターンの評価}
@@ -274,12 +226,12 @@ Nはパーティクルの数である。
 
 \begin{eqnarray}
   \label{exp:b_p_w_angle}
-  L_j(x_{t}^{(i)} | z_{j, t}, m, p_{angle})
+  L_j(x_{t}^{(i)} | z_{j, t}, m, p_\mathsf{angle})
 \end{eqnarray}
-観測情報$z_t$を観測パターン$p_{angle}$によってフィルタをかけることで、使用する観測情報に制限をかけている。
-例えば、図\ref{fig:z_pattern}のように、$p_{angle} = (a)$を持ったパーティクルであれば、
+観測情報$z_t$を観測パターン$p_\mathsf{angle}$によってフィルタをかけることで、使用する観測情報に制限をかけている。
+例えば、図\ref{fig:z_pattern}のように、$p_\mathsf{angle} = (a)$を持ったパーティクルであれば、
 尤度計算に用いる観測情報は$z_t$の全てである。
-$p_{angle} = (b)$を持ったパーティクルであれば、尤度計算に用いる観測情報は$360°$のうち$0°〜90°$を間引いた
+$p_\mathsf{angle} = (b)$を持ったパーティクルであれば、尤度計算に用いる観測情報は$360°$のうち$0°〜90°$を間引いた
 観測情報$z_t$になる。
 
 
@@ -304,7 +256,7 @@ $p_{angle} = (b)$を持ったパーティクルであれば、尤度計算に用
 
 \begin{figure}[h]
   \begin{center}
-    \includegraphics[width=1.2\linewidth]{figs/particle_filter_flow_improve.png}
+    \includegraphics[width=1.0\linewidth]{figs/particle_filter_flow_improve.png}
     \caption{提案した手法用いたパーティクルフィルタの流れ}
     \label{fig:particle_filter_flow_improve}
   \end{center}
