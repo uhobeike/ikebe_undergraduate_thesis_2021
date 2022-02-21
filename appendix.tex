@@ -7,7 +7,7 @@ Raspberry Pi Cat(以下ラズパイキャット)は図\ref{fig:raspicat}で示�
 \begin{figure}[h]
 	\begin{center}
 		\includegraphics[width=0.5\linewidth]{figs/raspicat.png}
-		\caption{}
+		\caption{Raspberry Pi Cat}
 		\label{fig:raspicat}
 	\end{center}
 \end{figure}
@@ -32,7 +32,7 @@ UST-30LXの走査角度は270度, 角度分解能は0.25度, 測定分解能は1
 \begin{figure}[h]
 	\begin{center}
 		\includegraphics[width=0.5\linewidth]{figs/raspicat-lidar.pdf}
-		\caption{}
+		\caption{2D LiDARの取り付け位置}
 		\label{fig:raspicat-lidar}
 	\end{center}
 \end{figure}
@@ -50,8 +50,8 @@ Raspberry Pi 3 Model Bから送られてくる速度指令値に基づいてモ�
 \begin{figure}[h]
 	\begin{center}
 		\includegraphics[width=1.0\linewidth]{figs/raspicat-hardware-config.pdf}
-		\caption{}
 		\label{fig:raspicat-hardware-config}
+		\caption{ハードウェア構成}
 	\end{center}
 \end{figure}
 
@@ -67,12 +67,10 @@ motorsノードで速度指令値(/cmd\_vel)を積算させたデッドレコニ
 そのため, 急回転には弱いが非常に簡素なシステムになっているためシステムの
 立ち上げミスが少ない.
 
-
-
 \begin{figure}[H]
 	\begin{center}
 		\includegraphics[width=0.9\linewidth]{figs/raspicat-software-config.pdf}
-		\caption{}
+		\caption{ROSのネットワーク}
 		\label{fig:raspicat-software-config}
 	\end{center}
 \end{figure}
