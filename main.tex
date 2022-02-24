@@ -12,6 +12,7 @@
 \usepackage{algorithmic}
 \usepackage{algorithm}
 \usepackage{subcaption}
+\usepackage{url}
 % \makeindex
 
 \pagenumbering{roman}
@@ -51,8 +52,36 @@ Chiba Institute of Technology}
 
 % %% 参考文献 %%%
 % よほどのことが無い限りet al.は使わないことにしましょう
-\bibliographystyle{unsrt}
-\bibliography{./references}
+% \bibliographystyle{unsrt}
+% \bibliography{./references}
+
+\begin{thebibliography}{99}
+
+  \bibitem{mcl}
+    Jens-Steffen Gutmann and Dieter Fox: An Experimental Comparison of Localization Methods Continued, 
+    Princeton University Press(1957), Proc. of the \textit{IROS}, pages 454-459, 2002.
+  \bibitem{amcl}
+    ROS.org：``amcl'', \url{https://wiki.ros.org/amcl} (last visit: 2021-10-20).
+  \bibitem{emcl}
+    Ryuichi Ueda: ``ryuichiueda/emcl'', \url{https://github.com/ryuichiueda/emcl} (last visit: 2021-10-20). 
+  \bibitem{ueda2004iros}
+    Ryuichi Ueda and Tamio Arai and Kohei Sakamoto and Toshifumi Kikuchi and Shogo Kamiya: 
+    ``Expansion Resetting for Recovery from Fatal Error in Monte Carlo Localization -- Comparison with Sensor Resetting Methods,'' Proc. of IROS, pp.2481--2486, 2004.  
+  \bibitem{富沢}
+    冨沢 哲雄 and 村松 聡 and 平井 雅尊 and 佐藤 晶則 and 工藤 俊亮 and 末廣 尚士:
+    ``グリッドマップのマッチングに基づく未知障害物にロバストな自己位置推定'', 日本ロボット学会誌, 30(3):280-286, 2012.
+  \bibitem{赤井}
+    赤井 直紀 and モラレス ルイス 洋一 and 平山 高嗣 and 村瀬 洋:
+    ``幾何地図上での観測物体の有無を考慮した自己位置推定'', 計測自動制御学会論文集, 55(11):745-753, 2019.
+  \bibitem{raspicat}
+    ROS.org：``ja/raspicat'', \url{https://wiki.ros.org/ja/raspicat} (last visit: 2021-10-20). 
+  \bibitem{RTshop}
+    株式会社アールティ：``Raspberry Pi Cat 屋外でも動かせる中型2輪ロボット'', 
+    RT Robot Shop Products, \url{https://rt-net.jp/products/raspberry-pi-cat/}(last visit 2021-10-16)
+  \bibitem{UST-30LX}
+    株式会社北陽：``UST-30LX'', 
+    製品概要, \url{https://www.hokuyo-aut.co.jp/search/single.php?serial=195#spec}(last visit 2022-2-24)
+  \end{thebibliography}
 
 \newpage
 \printindex
